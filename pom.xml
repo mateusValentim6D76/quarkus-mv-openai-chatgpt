@@ -51,6 +51,10 @@
             <artifactId>quarkus-arc</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.smallrye.openapi</groupId>
+            <artifactId>smallrye-open-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-bom</artifactId>
             <type>pom</type>
