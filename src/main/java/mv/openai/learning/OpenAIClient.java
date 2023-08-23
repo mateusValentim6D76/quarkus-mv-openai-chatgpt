@@ -1,27 +1,27 @@
 package mv.openai.learning;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.json.Json;
-import jakarta.json.JsonObject;
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.ClientBuilder;
-import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.HttpHeaders;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 
 @ApplicationScoped
 public class OpenAIClient {
 
-    private Client clientBuilder;
-    private WebTarget target;
+    Client clientBuilder;
+    WebTarget textCompletionsTarget;
 
     @Inject
     @ConfigProperty(name = "openai.secret-key")
@@ -30,21 +30,22 @@ public class OpenAIClient {
     @PostConstruct
     void initClient() {
         clientBuilder = ClientBuilder.newClient();
-        target = clientBuilder.target("https://api.openai.com/v1/completions");
+        textCompletionsTarget = clientBuilder.target("https://api.openai.com/v1/completions");
     }
 
     public String generateText(String prompt) {
-        JsonObject jsonObject = Json.createObjectBuilder()
+        JsonObject json = Json.createObjectBuilder()
                 .add("model", "text-davinci-003")
                 .add("prompt", prompt)
-                .add("max_tokens", 64)
-                .build();
+                .add("max_tokens", 1000).build();
 
-        Response response = target.request(MediaType.APPLICATION_JSON_TYPE)
+        System.out.println(json.toString());
+        Response response = textCompletionsTarget.request(MediaType.APPLICATION_JSON_TYPE)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + secretKey)
-                .post(Entity.json(jsonObject));
+                .post(Entity.json(json));
+        JsonObject jsonObject = response.readEntity(JsonObject.class);
 
-        return response.readEntity(String.class);
+        return jsonObject.getJsonArray("choices").getJsonObject(0).getString("text");
     }
 
     @PreDestroy
