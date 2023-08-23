@@ -15,6 +15,6 @@ public class TextGenerationResource {
 
     @GET
     public String text(){
-        return openAIClient.generateText("Generate 5 names with first and last name of Brazilian origin");
+        return openAIClient.generateText("Top songs of 2021");
     }
 }
