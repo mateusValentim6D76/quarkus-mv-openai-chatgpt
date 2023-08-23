@@ -40,12 +40,13 @@ public class OpenAIClient {
                 .add("max_tokens", 1000).build();
 
         System.out.println(json.toString());
-        try (Response response = textCompletionsTarget.request(MediaType.APPLICATION_JSON_TYPE)
+        Response response = textCompletionsTarget.request(MediaType.APPLICATION_JSON_TYPE)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + secretKey)
-                .post(Entity.json(json))) {
+                .post(Entity.json(json));
 
-            return response.readEntity(String.class);
-        }
+        JsonObject jsonObject = response.readEntity(JsonObject.class);
+
+        return jsonObject.getJsonArray("choices").getJsonObject(0).getString("text");
     }
 
     @PreDestroy
